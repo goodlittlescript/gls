@@ -1,5 +1,9 @@
 #!/bin/bash
 #############################################################################
+export GLS_VERSION="1.0.0"
+export GLS_RELDATE="2014-12-14"
+export GLS_URL="https://github.com/goodlittlescript/gls"
+
 gls_guess_home () {
   gls_command="$1"
   gls_path="$(command -v ${gls_command})"
@@ -49,9 +53,7 @@ commands:
 }
 
 gls_version () {
-version="0.0.0"
-reldate="0000-00-00"
-printf "gls %s (%s)\n" "$version" "$reldate"
+printf "gls %s - %s\n" "$GLS_VERSION" "$GLS_URL"
 }
 
 while getopts "hv" option
