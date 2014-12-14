@@ -1,0 +1,164 @@
+#!/bin/bash
+. test/helper
+
+setup () {
+export PATH="$PWD/test/libexec:$PATH"
+}
+
+assert_filtered_output () {
+  grep -Ev '^ *(env|list)' |
+  assert_output "$@"
+}
+
+#
+# tests
+#
+
+test_gls_list_lists_commands_along_GLS_PATH_with_GLS_COMMAND_DESC_from_ENV () {
+gls list | assert_filtered_output "\
+  a               desc a
+  x
+  xx
+  y
+  z
+"
+}
+
+test_gls_list_filters_under_command () {
+gls list a | assert_filtered_output "\
+  b               desc a-b
+"
+}
+
+test_gls_list_ignores_unreadable_dirs_without_error () {
+export PATH="$PWD/non_existent_dir:$PATH"
+gls list 2>&1 | grep -q 'No such file or directory'
+[ $? -ne 0 ]
+}
+
+test_gls_list_ignores_non_executable_files () {
+mkdir -p "$ts_test_dir"
+touch "$ts_test_dir/gls-nonexecutable"
+export PATH="$ts_test_dir:$PATH"
+gls list 2>&1 | grep -q 'nonexecutable'
+[ $? -ne 0 ]
+}
+
+test_gls_list_does_not_descend_into_directories () {
+mkdir -p "$ts_test_dir/dir"
+touch "$ts_test_dir/dir/gls-indir"
+chmod +x "$ts_test_dir/dir/gls-indir"
+export PATH="$ts_test_dir:$PATH"
+gls list | grep -q 'indir'
+[ $? -ne 0 ]
+}
+
+#
+# mode tests
+#
+
+test_gls_list_a_lists_all_commands () {
+gls list -q -a | assert_filtered_output "\
+a
+a.env
+x
+xx
+y
+z
+"
+}
+
+test_gls_list_a_works_with_filters () {
+gls list -q -a a | assert_filtered_output "\
+b
+b.env
+"
+}
+
+test_gls_list_c_lists_commands () {
+gls list -q -c | assert_filtered_output "\
+a
+x
+xx
+y
+z
+"
+}
+
+
+test_gls_list_e_lists_env_commands () {
+gls list -q -e | assert_filtered_output "\
+a.env
+"
+}
+
+test_gls_list_modes_are_additive () {
+gls list -q -ce | assert_filtered_output "\
+a
+a.env
+x
+xx
+y
+z
+"
+}
+
+
+#
+# -n tests
+#
+
+test_gls_list_n_lists_child_commands () {
+gls list -q -n | assert_filtered_output "\
+a
+a b
+a b c
+x
+x y
+x z
+xx
+xx yy
+xx zz
+y
+z
+"
+}
+
+test_gls_list_n_filters_child_commands () {
+gls list -q -n a | assert_filtered_output "\
+b
+b c
+"
+}
+
+test_gls_list_n_filters_child_commands_ambiguous_prefix () {
+gls list -q -n x | assert_filtered_output "\
+y
+z
+"
+}
+
+test_gls_list_n_works_with_modes_and_filters () {
+gls list -q -na a | assert_filtered_output "\
+b
+b c
+b c.env
+b.env
+"
+}
+
+#
+# -q test
+#
+
+test_gls_list_q_does_not_print_summaries () {
+gls list -q | assert_filtered_output "\
+a
+x
+xx
+y
+z
+"
+}
+
+. ts

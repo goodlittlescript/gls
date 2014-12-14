@@ -1,0 +1,19 @@
+#!/bin/bash
+command=$1
+shift 1
+
+if [ -z "$command" ]
+then
+  printf "no command specified\n" >&2
+  exit 1
+fi
+
+. gls_exec_env "$command"
+
+if command -v "${GLS_COMMAND}" >/dev/null 2>&1
+then
+  exec "${GLS_COMMAND}" "$@"
+else
+  printf "unknown command: %s\n" "${GLS_COMMAND}" >&2
+  exit 1
+fi

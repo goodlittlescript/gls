@@ -1,0 +1,78 @@
+#!/bin/bash
+#############################################################################
+gls_guess_home () {
+  gls_command="$1"
+  gls_path="$(command -v ${gls_command})"
+
+  while [ -h "$gls_path" ]
+  do
+    gls_link_list="$(ls -l "$gls_path" 2>/dev/null)"
+    gls_path="${gls_link_list#* -> }"
+  done
+
+  cd "${gls_path%/*}/.."
+  pwd
+}
+
+if ! command -v gls_exec >/dev/null 2>&1
+then
+  export GLS_HOME=${GLS_HOME:-$(gls_guess_home gls)}
+  export PATH="${PATH}:${GLS_HOME}/core"
+fi
+
+if [ "." = "$1" ]
+then
+  export gls="${2:-${0##*/}}"
+  export GLS="${3:-$(tr [:lower:] [:upper:] <<<"$gls")}"
+  return 1
+else
+  export gls="gls"
+  export GLS="GLS"
+fi
+#############################################################################
+gls_usage () {
+printf "%s" "\
+usage: gls [-hv] COMMAND ARGS...
+
+  Launches gls commands.
+
+options:
+
+  -h                          prints help
+  -v                          prints version
+
+commands:
+
+`gls list`
+
+"
+}
+
+gls_version () {
+version="0.0.0"
+reldate="0000-00-00"
+printf "gls %s (%s)\n" "$version" "$reldate"
+}
+
+while getopts "hv" option
+do
+  case $option in
+    (h)  gls_usage
+         exit 0 ;;
+    (v)  gls_version
+         exit 0 ;;
+    (*)  gls_usage | head -n 2
+         exit 2 ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+if [ $# -eq 0 ]
+then
+  gls_usage
+  exit 1
+fi
+#############################################################################
+
+. gls_exec_reset
+. gls_exec

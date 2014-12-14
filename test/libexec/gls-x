@@ -1,0 +1,29 @@
+#!/bin/bash
+#############################################################################
+gls_x_usage () {
+printf "%s" "\
+usage: gls x [-h]
+
+  Test x.  More documentation.
+
+options:
+
+  -h  prints help
+
+"
+}
+while getopts "h" option
+do
+  case $option in
+    (h)  gls_x_usage
+         exit 0 ;;
+    (*)  gls_x_usage | head -n 1
+         exit 2 ;;
+  esac
+done
+#############################################################################
+
+if [ $# -eq 0 ]
+then printf "x\n"
+else gls_exec "$@"
+fi

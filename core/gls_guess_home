@@ -1,0 +1,3 @@
+#!/bin/bash
+. gls . "$gls" "$GLS"
+gls_guess_home "$@"

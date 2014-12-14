@@ -1,0 +1,20 @@
+#!/bin/bash
+for command in "$@"
+do
+  base=${command%.*}
+  extname=${command#$base}
+
+  export GLS_COMMAND_PATH="${GLS_COMMAND_PATH}${GLS_COMMAND_PATH:+/}${base}"
+  export GLS_COMMAND_BASE="${GLS_COMMAND_BASE}${GLS_COMMAND_BASE:+_}${base}"
+  export GLS_COMMAND="${gls}-${GLS_COMMAND_BASE}${extname}"
+
+  unset command base extname "${GLS}_COMMAND_DESC"
+
+  export "${GLS}_COMMAND_PATH"="$GLS_COMMAND_PATH"
+  export "${GLS}_COMMAND_BASE"="$GLS_COMMAND_BASE"
+  export "${GLS}_COMMAND"="$GLS_COMMAND"
+
+  if command -v "${gls}-${GLS_COMMAND_BASE}.env" >/dev/null 2>&1
+  then . "${gls}-${GLS_COMMAND_BASE}.env"
+  fi
+done

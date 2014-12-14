@@ -1,0 +1,5 @@
+#!/bin/bash
+unset GLS_COMMAND_PATH
+unset GLS_COMMAND_BASE
+unset GLS_COMMAND_DESC
+unset GLS_COMMAND

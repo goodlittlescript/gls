@@ -1,0 +1,83 @@
+#!/bin/bash
+. test/helper
+
+setup () {
+export PATH="$PWD/test/libexec:$PATH"
+}
+
+#
+# tests
+#
+
+test_env_prints_default_env_for_command () {
+gls env a | grep GLS_TEST | assert_output "\
+GLS_TEST_A=a.env
+GLS_TEST_A_B=a.env
+GLS_TEST_A_B_C=a.env
+GLS_TEST_A_B_C_ENV=a.env
+GLS_TEST_A_B_ENV=a.env
+GLS_TEST_A_ENV=a.env
+"
+}
+
+test_env_prints_default_env_for_nested_command () {
+gls env a b | grep GLS_TEST | assert_output "\
+GLS_TEST_A=a.env
+GLS_TEST_A_B=a_b.env
+GLS_TEST_A_B_C=a_b.env
+GLS_TEST_A_B_C_ENV=a_b.env
+GLS_TEST_A_B_ENV=a_b.env
+GLS_TEST_A_ENV=a.env
+"
+}
+
+test_env_prints_default_env_for_deeply_nested_command () {
+gls env a b c | grep GLS_TEST | assert_output "\
+GLS_TEST_A=a.env
+GLS_TEST_A_B=a_b.env
+GLS_TEST_A_B_C=a_b_c.env
+GLS_TEST_A_B_C_ENV=a_b_c.env
+GLS_TEST_A_B_ENV=a_b.env
+GLS_TEST_A_ENV=a.env
+"
+}
+
+test_env_only_includes_exported_variables () {
+export PATH="$ts_test_dir:$PATH"
+mkdir -p "$ts_test_dir"
+touch "$ts_test_dir/gls-example"
+chmod +x "$ts_test_dir/gls-example"
+cat <<DOC > "$ts_test_dir/gls-example.env"
+GLS_EXAMPLE_A=abc
+GLS_EXAMPLE_B=xyz
+export GLS_EXAMPLE_B
+DOC
+
+gls env example | grep GLS_EXAMPLE | assert_output "\
+GLS_EXAMPLE_B=xyz
+"
+}
+
+#
+# tests
+#
+
+test_env_identifies_unknown_commands () {
+gls env unknown 2>&1 | assert_output "\
+unknown command: gls-unknown
+"
+}
+
+#
+# -f format
+#
+
+test_gls_env_can_be_exported () {
+  unset GLS_HOME
+  eval "$(gls env -f export)"
+
+  # env only shows exported variables
+  env | grep '^GLS_HOME'
+}
+
+. ts

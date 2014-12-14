@@ -1,0 +1,175 @@
+#!/bin/bash
+. test/helper
+
+setup () {
+mkdir -p "$ts_test_dir"
+export PATH="$ts_test_dir:$PWD/test/libexec:$PATH"
+}
+
+#
+# tests
+#
+
+test_gls_prints_help () {
+gls | grep -q "usage: gls"
+}
+
+test_gls_h_prints_help () {
+gls -h | grep -q "usage: gls"
+}
+
+test_gls_delegates_to_gls_command () {
+echo "echo hi" > "$ts_test_dir/gls-hello"
+chmod +x "$ts_test_dir/gls-hello"
+gls hello | assert_output "\
+hi
+"
+}
+
+test_gls_identifies_unknown_commands () {
+gls unknown 2>&1 | assert_output "\
+unknown command: gls-unknown
+"
+}
+
+test_gls_guesses_home () {
+gls env | grep GLS_HOME | assert_output "\
+GLS_HOME=$PWD
+"
+}
+
+test_gls_guesses_home_when_gls_is_a_symlink () {
+mkdir -p "$ts_test_dir"
+ln -s "$PWD/bin/gls" "$ts_test_dir/gls"
+
+export PATH="$ts_test_dir:$PATH"
+gls env | grep GLS_HOME | assert_output "\
+GLS_HOME=$PWD
+"
+}
+
+test_gls_guesses_home_when_gls_is_a_chained_symlink () {
+mkdir -p "$ts_test_dir"
+ln -s "$PWD/bin/gls" "$ts_test_dir/gls-a"
+ln -s "$ts_test_dir/gls-a" "$ts_test_dir/gls"
+
+export PATH="$ts_test_dir:$PATH"
+gls env | grep GLS_HOME | assert_output "\
+GLS_HOME=$PWD
+"
+}
+
+test_gls_guesses_home_when_gls_is_on_relative_path () {
+export PATH="bin:$PATH"
+gls env | grep GLS_HOME | assert_output "\
+GLS_HOME=$PWD
+"
+}
+
+#
+# . gls .
+#
+
+test_gls_adds_GLS_HOME_to_PATH_when_sourced_with_dot () {
+. gls .
+command -v gls_exec >/dev/null
+}
+
+test_gls_exports_gls_and_GLS_when_sourced_with_dot () {
+. gls . abc XYZ
+env | grep -i gls= | sort | assert_output "\
+GLS=XYZ
+gls=abc
+"
+}
+
+test_gls_guesses_GLS_as_upcase_gls_when_sourced_with_dot () {
+. gls . abc
+env | grep -i gls= | sort | assert_output "\
+GLS=ABC
+gls=abc
+"
+}
+
+test_gls_guesses_gls_according_to_calling_program_when_sourced_with_dot () {
+cat > "$ts_test_dir"/example <<CMD
+#!/bin/bash
+. gls .
+env
+CMD
+chmod +x "$ts_test_dir"/example
+"$ts_test_dir"/example | grep -i gls= | sort | assert_output "\
+GLS=EXAMPLE
+gls=example
+"
+}
+
+test_gls_adds_GLS_PATH_to_PATH () {
+GLS_PATH="$ts_test_dir"
+cat > "$ts_test_dir"/gls-pwd <<CMD
+#!/bin/sh
+exit 0
+CMD
+chmod +x "$ts_test_dir"/gls-pwd
+gls pwd
+}
+
+#
+# GLS_PATH
+#
+
+test_gls_adds_pwd_to_PATH_if_GLS_PATH_starts_with_colon () {
+GLS_PATH=":/dev/null"
+cd "$ts_test_dir"
+cat > gls-pwd <<CMD
+#!/bin/sh
+exit 0
+CMD
+chmod +x gls-pwd
+gls pwd
+}
+
+#
+# env
+#
+
+test_command_env_is_sourced_prior_to_command () {
+gls a | assert_a_env
+}
+
+test_command_env_is_sourced_prior_to_nested_command () {
+gls a b | assert_a_b_env
+}
+
+test_command_env_is_sourced_prior_to_deeply_nested_command () {
+gls a b c | assert_a_b_c_env
+}
+
+test_command_env_is_setup_prior_to_command () {
+gls a | grep 'GLS_COMMAND' | assert_output "\
+GLS_COMMAND=gls-a
+GLS_COMMAND_BASE=a
+GLS_COMMAND_DESC=desc a
+GLS_COMMAND_PATH=a
+"
+}
+
+test_command_env_is_setup_prior_to_nested_command () {
+gls a b | grep 'GLS_COMMAND' | assert_output "\
+GLS_COMMAND=gls-a_b
+GLS_COMMAND_BASE=a_b
+GLS_COMMAND_DESC=desc a-b
+GLS_COMMAND_PATH=a/b
+"
+}
+
+test_command_env_is_setup_prior_to_deeply_nested_command () {
+gls a b c | grep 'GLS_COMMAND' | assert_output "\
+GLS_COMMAND=gls-a_b_c
+GLS_COMMAND_BASE=a_b_c
+GLS_COMMAND_DESC=desc a-b-c
+GLS_COMMAND_PATH=a/b/c
+"
+}
+
+. ts

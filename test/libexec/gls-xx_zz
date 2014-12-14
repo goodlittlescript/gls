@@ -1,0 +1,26 @@
+#!/bin/bash
+#############################################################################
+gls_xx_zz_usage () {
+printf "%s" "\
+usage: gls xx zy [-h]
+
+  Test x-z.  More documentation.
+
+options:
+
+  -h  prints help
+
+"
+}
+while getopts "h" option
+do
+  case $option in
+    (h)  gls_xx_zz_usage
+         exit 0 ;;
+    (*)  gls_xx_zz_usage | head -n 1
+         exit 2 ;;
+  esac
+done
+#############################################################################
+
+printf "xx-zz\n"

@@ -1,0 +1,57 @@
+#!/bin/bash
+#############################################################################
+gls_env_usage () {
+printf "%s" "\
+usage: gls env [COMMAND...]
+
+  Prints the ENV at the start of COMMAND.
+
+options:
+
+  -f        format (shell,export)
+  -h        prints help
+
+"
+}
+args=""
+while [ $OPTIND -le $# ]
+do
+  if getopts "f:h" option
+  then
+    case $option in
+      (f) gls_env_format=$OPTARG ;;
+      (h) gls_env_usage
+          exit 0 ;;
+      (*) gls_env_usage | head -n 1
+          exit 2 ;;
+    esac
+  else
+    args="$args \"\${$OPTIND}\"" 
+    OPTIND=$(($OPTIND + 1))
+  fi
+done
+eval set -- "$args"
+gls_env_format=${gls_env_format:-shell}
+#############################################################################
+
+. gls_exec_reset
+. gls_exec_env
+
+if [ $# -gt 0 ] && ! command -v "${GLS_COMMAND}" >/dev/null 2>&1
+then
+  printf "unknown command: %s\n" "${GLS_COMMAND}" >&2
+  exit 1
+fi
+
+case "$gls_env_format" in
+  (shell)
+    env | sort
+    ;;
+  (export)
+    env | sort | sed -e 's/^/export /'
+    ;;
+  (*)
+    printf "unknown format: %s\n" "$gls_env_format" >&2
+    exit 1
+    ;;
+esac

@@ -1,0 +1,12 @@
+#!/bin/bash
+ls -1df 2>/dev/null "$@" |
+awk '
+  BEGIN {ORS=""; SEP=""};
+  {
+    if ( paths[$0] == 0 ) {
+      paths[$0] = 1
+      print SEP $0
+      SEP=":"
+    }
+  }
+'

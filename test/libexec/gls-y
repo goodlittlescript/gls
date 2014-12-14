@@ -1,0 +1,26 @@
+#!/bin/bash
+#############################################################################
+gls_y_usage () {
+printf "%s" "\
+usage: gls y [-h]
+
+  Test y.  More documentation.
+
+options:
+
+  -h  prints help
+
+"
+}
+while getopts "h" option
+do
+  case $option in
+    (h)  gls_y_usage
+         exit 0 ;;
+    (*)  gls_y_usage | head -n 1
+         exit 2 ;;
+  esac
+done
+#############################################################################
+
+printf "y\n"

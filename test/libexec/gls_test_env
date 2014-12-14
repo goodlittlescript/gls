@@ -1,0 +1,2 @@
+#!/bin/sh
+env | grep "^${GLS}_" | tr -d "'" | sort

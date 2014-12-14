@@ -1,0 +1,33 @@
+#!/bin/bash
+#############################################################################
+gls_a_usage () {
+printf "%s" "\
+usage: gls a [-h]
+
+  Test a.  More documentation.
+
+options:
+
+  -h  prints help
+"
+}
+while getopts "h" option
+do
+  case $option in
+    (h)  gls_a_usage
+         exit 0 ;;
+    (*)  gls_a_usage | head -n 1
+         exit 2 ;;
+  esac
+done
+#############################################################################
+export GLS_TEST_A=a
+export GLS_TEST_A_B_ENV=a
+export GLS_TEST_A_B=a
+export GLS_TEST_A_B_C_ENV=a
+export GLS_TEST_A_B_C=a
+
+if [ $# -eq 0 ]
+then gls_test_env
+else gls_exec "$@"
+fi

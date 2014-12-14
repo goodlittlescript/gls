@@ -1,0 +1,48 @@
+# Clear any incoming gls variables/functions and blank config dirs
+unset $(env | sed -n -e '
+  /^GLS_/s/=.*//p
+  /^gls_/s/=.*//p
+')
+
+# Setup test paths
+export PATH="$PWD/bin:$PWD/vendor/ts/bin:$PATH"
+
+# For sorting
+export LC_ALL=C
+
+# Helpers for testing env inheritance
+assert_a_env () {
+ext=${1:-}
+grep GLS_TEST | tr -d "'" | assert_output "\
+GLS_TEST_A=a$ext
+GLS_TEST_A_B=a$ext
+GLS_TEST_A_B_C=a$ext
+GLS_TEST_A_B_C_ENV=a$ext
+GLS_TEST_A_B_ENV=a$ext
+GLS_TEST_A_ENV=a.env
+"
+}
+
+assert_a_b_env () {
+ext=${1:-}
+grep GLS_TEST | tr -d "'" | assert_output "\
+GLS_TEST_A=a$ext
+GLS_TEST_A_B=a_b$ext
+GLS_TEST_A_B_C=a_b$ext
+GLS_TEST_A_B_C_ENV=a_b$ext
+GLS_TEST_A_B_ENV=a_b.env
+GLS_TEST_A_ENV=a.env
+"
+}
+
+assert_a_b_c_env () {
+ext=${1:-}
+grep GLS_TEST | tr -d "'" | assert_output "\
+GLS_TEST_A=a$ext
+GLS_TEST_A_B=a_b$ext
+GLS_TEST_A_B_C=a_b_c$ext
+GLS_TEST_A_B_C_ENV=a_b_c.env
+GLS_TEST_A_B_ENV=a_b.env
+GLS_TEST_A_ENV=a.env
+"
+}
