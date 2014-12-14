@@ -42,8 +42,8 @@ usage: gls [-hv] COMMAND ARGS...
 
 options:
 
-  -h                          prints help
-  -v                          prints version
+  -h              prints help
+  -v              prints version
 
 commands:
 
