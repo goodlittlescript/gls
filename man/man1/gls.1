@@ -1,0 +1,85 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "GLS" "1" "December 2014" "1.0.0" ""
+.
+.SH "NAME"
+\fBgls\fR \- a library for command sets
+.
+.SH "SYNOPSIS"
+\fBgls\fR \fIoptions\fR COMMAND \.\.\.
+.
+.SH "DESCRIPTION"
+\fBgls\fR is a library for making command sets\.
+.
+.SH "OPTIONS"
+These options control how \fBgls\fR operates\.
+.
+.TP
+\fB\-h\fR
+Prints help\.
+.
+.TP
+\fB\-v\fR
+Prints version information\.
+.
+.SH "INSTALLATION"
+Add \fBgls\fR to PATH\. If using homebrew:
+.
+.IP "" 4
+.
+.nf
+
+brew tap goodlittlescript/homebrew\-gls
+brew install gls
+.
+.fi
+.
+.IP "" 0
+.
+.SH "DEVELOPMENT"
+Setup:
+.
+.IP "" 4
+.
+.nf
+
+git clone git://github\.com/goodlittlescript/gls
+git submodule init
+git submodule update
+.
+.fi
+.
+.IP "" 0
+.
+.P
+To run the tests:
+.
+.IP "" 4
+.
+.nf
+
+\[char46]/test/suite
+.
+.fi
+.
+.IP "" 0
+.
+.P
+To generate the manpages:
+.
+.IP "" 4
+.
+.nf
+
+make manpages
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Report bugs here: http://github\.com/goodlittlescript/gls/issues\.
+.
+.SH "COPYRIGHT"
+GLS is Copyright (C) 2014 Simon Chiang \fIhttp://github\.com/thinkerbot\fR
