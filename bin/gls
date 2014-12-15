@@ -1,6 +1,6 @@
 #!/bin/bash
 #############################################################################
-export GLS_VERSION="1.0.0"
+export GLS_VERSION="1.0.1"
 export GLS_RELDATE="2014-12-14"
 export GLS_URL="https://github.com/goodlittlescript/gls"
 
