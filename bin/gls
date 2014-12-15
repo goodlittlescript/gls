@@ -10,6 +10,7 @@ gls_guess_home () {
 
   while [ -h "$gls_path" ]
   do
+    cd "${gls_path%/*}"
     gls_link_list="$(ls -l "$gls_path" 2>/dev/null)"
     gls_path="${gls_link_list#* -> }"
   done

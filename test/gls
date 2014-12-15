@@ -59,6 +59,20 @@ GLS_HOME=$PWD
 "
 }
 
+test_gls_guesses_home_when_gls_is_a_symlink_that_does_not_resolve_from_pwd () {
+mkdir -p "$ts_test_dir"
+ln -s "../../../bin/gls" "$ts_test_dir/gls"
+
+gls_home=$PWD
+mkdir -p "$ts_test_dir/dir"
+cd "$ts_test_dir/dir"
+
+export PATH="$ts_test_dir:$PATH"
+gls env | grep GLS_HOME | assert_output "\
+GLS_HOME=$gls_home
+"
+}
+
 test_gls_guesses_home_when_gls_is_on_relative_path () {
 export PATH="bin:$PATH"
 gls env | grep GLS_HOME | assert_output "\
