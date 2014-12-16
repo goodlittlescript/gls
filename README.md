@@ -42,6 +42,10 @@ To generate the manpages:
 
     make manpages
 
+To make a new release:
+
+    make release version=x.y.z
+
 Report bugs here: http://github.com/goodlittlescript/gls/issues.
 
 ## COPYRIGHT
