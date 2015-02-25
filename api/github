@@ -1,0 +1,41 @@
+#!/bin/bash
+. gls .
+#############################################################################
+github_usage () {
+printf "%s" "\
+usage: ${gls} [-h] [-D DOMAIN[:PORT]] COMMAND ARGS...
+
+  Launches a github command.
+
+options:
+
+  -D GITHUB_DOMAIN        github domain (add port if needed)
+  -h                      prints help
+
+commands:
+
+`gls-list`
+
+"
+}
+while getopts "D:h" option
+do
+  case $option in
+    (D) GITHUB_DOMAIN=$OPTARG ;;
+    (h) github_usage
+        exit 0 ;;
+    (*) github_usage | head -n 2
+        exit 2 ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+if [ $# -eq 0 ]
+then
+  github_usage
+  exit 1
+fi
+#############################################################################
+
+export GITHUB_DOMAIN=${GITHUB_DOMAIN:-api.github.com}
+gls_exec "$@"

@@ -1,0 +1,161 @@
+#!/bin/bash
+#############################################################################
+gls_basic_api_usage () {
+printf "%s" "\
+usage: ${GLS_COMMAND_BASE//_/ } [options] METHOD PATH [CURL_OPTIONS...]
+
+  Send a request to the API.
+
+options:
+
+  -d            debug
+  -h            prints help
+  -i            include headers (curl --include)
+  -k            ignore ssl cert (curl --insecure)
+  -R            remove token file (after)
+  -r            remove token file (before)
+  -v            verbose output
+  -w FORMAT     output format (curl --write-out)
+
+"
+}
+args=""
+curl_opts=("--globoff" "--silent" "--show-error")
+
+arr=("${arr[@]}" "$1")
+while [ $OPTIND -le $# ]
+do
+  if getopts "dhikpRrvw:" option
+  then
+    case $option in
+      (d)  curl_opts=("${curl_opts[@]}" "--trace-ascii" "-" "--trace-time") ;;
+      (h)  gls_basic_api_usage
+           exit 0 ;;
+      (i)  curl_opts=("${curl_opts[@]}" "--include") ;;
+      (k)  curl_opts=("${curl_opts[@]}" "--insecure") ;;
+      (p)  preview=true ;;
+      (R)  remove_token_after=true ;;
+      (r)  remove_token_before=true ;;
+      (v)  curl_opts=("${curl_opts[@]}" "--verbose") ;;
+      (w)  curl_opts=("${curl_opts[@]}" "--write-out" "$OPTARG") ;;
+      (*)  gls_basic_api_usage | head -n 2
+           exit 2 ;;
+    esac
+  else
+    args="$args \"\${$OPTIND}\"" 
+    OPTIND=$(($OPTIND + 1))
+  fi
+done
+eval set -- "$args"
+
+protocol="${gls_basic_api_protocol:-https}"
+username="${username:-}"
+password="${password:-}"
+domain="${gls_basic_api_domain}"
+token_file="${gls_basic_api_token_file:-$HOME/.${GLS_COMMAND_PATH}/token}"
+path_prefix="${gls_basic_api_path_prefix}"
+path_suffix="${gls_basic_api_path_suffix}"
+remove_token_before="${remove_token_before:-false}"
+remove_token_after="${remove_token_after:-false}"
+
+#############################################################################
+
+gls_basic_api_urlencode () {
+  ruby -r erb -e 'ARGV.each {|arg| puts ERB::Util.url_encode(arg) }' "$@"
+}
+
+gls_basic_api_auth () {
+  username="$1"; password="$2"; domain="$3"; token_file="$4";
+  shift 4
+
+  if ! [ -e "$token_file" ]
+  then
+    mkdir -p "$(dirname "$token_file")"
+    touch "$token_file"
+    chmod 600 "$token_file"
+  fi
+
+  if ! grep -F "@$domain" "$token_file" 2> /dev/null && [ -t 0 ]
+  then
+    if [ x"$username" = x ]
+    then
+      printf "user (%s): " "$domain" >&2
+      read username
+    fi
+
+    if [ x"$password" = x ]
+    then
+      printf "password (%s): " "$username" >&2
+      stty -echo
+      read password
+      stty echo
+      printf "\n" >&2
+    fi
+
+    token="$(gls_basic_api_fetch_token_unencoded "$username" "$password" "$domain")"
+
+    if [ -n "$token" ]
+    then
+      printf "%s@%s\n" "$token" "$domain" | tee -a "$token_file"
+    else
+      printf "fatal: no token! (check your credentials)\n" >&2
+      exit 1
+    fi
+  fi
+}
+
+if ! type gls_basic_api_fetch_token_unencoded > /dev/null 2>&1
+then
+gls_basic_api_fetch_token_unencoded () {
+  username=$1; password=$2; domain=$3;
+  shift 3
+
+  username="$(gls_basic_api_urlencode "$username")"
+  password="$(gls_basic_api_urlencode "$password")"
+  gls_basic_api_fetch_token "$username" "$password" "$domain"
+}
+fi
+
+if ! type gls_basic_api_fetch_token > /dev/null 2>&1
+then
+gls_basic_api_fetch_token () {
+  username=$1; password=$2; domain=$3;
+  shift 3
+
+  printf "%s:%s" "$username" "$password"
+}
+fi
+
+if [ true = "$remove_token_before" ]
+then rm -f "$token_file"
+fi
+
+if [ true = "$remove_token_after" ]
+then trap 'rm -f "$token_file"' EXIT
+fi
+
+auth="$(gls_basic_api_auth "$username" "$password" "$domain" "$token_file")"
+if [ $? -ne 0 ]
+then exit $?
+fi
+
+if [ $# -ge 2 ]
+then
+  method="$1"
+  path="$2"
+  shift 2
+  case "$method" in
+    (get|GET)         curl_opts=("${curl_opts[@]}" "--get" ) ;;
+    (put|PUT)         curl_opts=("${curl_opts[@]}" "-X" "PUT" ) ;;
+    (post|POST)       curl_opts=("${curl_opts[@]}" "-X" "POST" ) ;;
+    (post301|POST301) curl_opts=("${curl_opts[@]}" "--post301" ) ;;
+    (post302|POST302) curl_opts=("${curl_opts[@]}" "--post302" ) ;;
+    (delete|DELETE)   curl_opts=("${curl_opts[@]}" "-X" "DELETE" ) ;;
+    (head|HEAD)       curl_opts=("${curl_opts[@]}" "-I" ) ;;
+    (*)
+      printf "invalid method: %s\n" "$method" >&2
+      exit 1
+  esac
+
+  ${preview:+echo} curl "${curl_opts[@]}" "$@" "${protocol}://${auth}${path_prefix}${path:+/}${path#/}${path_suffix}"
+fi
