@@ -59,6 +59,10 @@ path_suffix="${gls_basic_api_path_suffix}"
 remove_token_before="${remove_token_before:-false}"
 remove_token_after="${remove_token_after:-false}"
 
+if [ -n "$gls_basic_api_curl_opts" ]
+then curl_opts=("${curl_opts[@]}" "${gls_basic_api_curl_opts[@]}")
+fi
+
 #############################################################################
 
 gls_basic_api_urlencode () {
