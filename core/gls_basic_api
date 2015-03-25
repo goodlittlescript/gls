@@ -12,6 +12,7 @@ options:
   -h            prints help
   -i            include headers (curl --include)
   -k            ignore ssl cert (curl --insecure)
+  -p            preview commands
   -R            remove token file (after)
   -r            remove token file (before)
   -v            verbose output
