@@ -1,0 +1,14 @@
+#!/bin/bash
+gls_basic_api_domain="$ELASTIC_DOMAIN"
+gls_basic_api_token_file="/dev/null"
+gls_basic_api_protocol="http"
+
+gls_basic_api_auth () {
+  username="$1"; password="$2"; domain="$3"; token_file="$4";
+  shift 4
+
+  # no auth
+  printf "%s\n" "$domain"
+}
+
+. gls_basic_api

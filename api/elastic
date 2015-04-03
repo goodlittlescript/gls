@@ -1,0 +1,41 @@
+#!/bin/bash
+. gls .
+#############################################################################
+elastic_usage () {
+printf "%s" "\
+usage: ${gls} [-h] [-D DOMAIN[:PORT]] COMMAND ARGS...
+
+  Launches an elastic command.
+
+options:
+
+  -D ELASTIC_DOMAIN       elastic domain (add port if needed)
+  -h                      prints help
+
+commands:
+
+`gls-list`
+
+"
+}
+while getopts "D:h" option
+do
+  case $option in
+    (D) ELASTIC_DOMAIN=$OPTARG ;;
+    (h) elastic_usage
+        exit 0 ;;
+    (*) elastic_usage | head -n 2
+        exit 2 ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+if [ $# -eq 0 ]
+then
+  elastic_usage
+  exit 1
+fi
+#############################################################################
+
+export ELASTIC_DOMAIN=${ELASTIC_DOMAIN:-localhost:9200}
+gls_exec "$@"
