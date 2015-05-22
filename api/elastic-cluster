@@ -41,7 +41,5 @@ verbose="${verbose:-}"
 #############################################################################
 
 for query in "$@"
-do
-  # something is wrong here... why is elastic-api needed?
-  elastic-api get ${preview:+-p} "_cat/${query}?${verbose:+v}"
+do elastic api get ${preview:+-p} "_cat/${query}?${verbose:+v}"
 done
