@@ -1,0 +1,25 @@
+#!/bin/bash
+gls_basic_api_domain="$JENKINS_DOMAIN"
+gls_basic_api_token_file="$JENKINS_TOKEN_FILE"
+gls_basic_api_path_suffix="/api/json"
+
+gls_basic_api_fetch_token () {
+  username=$1; password=$2; domain=$3;
+  shift 3
+
+  token="$(
+    curl -s "https://$username:$password@$domain/user/$username/configure" |
+    sed -ne '
+    /apiToken/ {
+      s/.*_\.apiToken" value="//
+      s/".*//
+      p
+    }'
+  )"
+
+  if [ -n "$token" ]
+  then printf "%s:%s\n" "$username" "$token"
+  fi
+}
+
+. gls_basic_api

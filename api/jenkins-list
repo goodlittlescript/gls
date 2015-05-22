@@ -1,0 +1,38 @@
+#!/bin/bash
+#############################################################################
+jenkins_list_usage () {
+printf "%s" "\
+usage: jenkins list [-h] VIEWS...
+
+  List jobs.
+
+options:
+
+  -h        prints help
+
+"
+}
+args=""
+while [ $OPTIND -le $# ]
+do
+  if getopts "h" option
+  then
+    case $option in
+      (h)  jenkins_list_usage
+           exit 0 ;;
+      (*)  jenkins_list_usage | head -n 1
+           exit 2 ;;
+    esac
+  else
+    args="$args \"\${$OPTIND}\"" 
+    OPTIND=$(($OPTIND + 1))
+  fi
+done
+eval set -- "$args"
+
+#############################################################################
+
+jenkins api get / |
+jq -r '.jobs[] | [.color, .name] | join(" ")' |
+xargs printf "%-10s %s\n"
+

@@ -1,0 +1,55 @@
+#!/bin/bash
+. gls .
+#############################################################################
+jenkins_usage () {
+printf "%s" "\
+usage: jenkins [-h] [-D DOMAIN[:PORT]] [-K TOKEN_FILE] COMMAND ARGS...
+
+  Launches a jenkins command.
+
+options:
+
+  -D DOMAIN       jenkins domain (ex jenkins.example.com:3000)
+  -h              prints help
+  -K TOKEN_FILE   token file
+
+commands:
+
+`gls-list`
+
+"
+}
+while getopts "D:hK:" option
+do
+  case $option in
+    (D)  JENKINS_DOMAIN=$OPTARG ;;
+    (h)  jenkins_usage
+         exit 0 ;;
+    (K)  JENKINS_TOKEN_FILE=$OPTARG ;;
+    (*)  jenkins_usage | head -n 2
+         exit 2 ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+if [ $# -eq 0 ]
+then
+  jenkins_usage
+  exit 1
+fi
+#############################################################################
+
+if [ -z "$JENKINS_DOMAIN" ]
+then
+  printf "JENKINS_DOMAIN is not set. Set it and try again.\n" >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null
+then
+  printf "jq could not be found.  Install and try again (http://stedolan.github.io/jq/).\n" >&2
+  exit 1
+fi
+
+export JENKINS_DOMAIN="$JENKINS_DOMAIN"
+gls_exec "$@"
