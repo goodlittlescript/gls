@@ -25,6 +25,8 @@ then
   export PATH="${PATH}:${GLS_HOME}/core"
 fi
 
+. gls_exec_reset
+
 if [ "." = "$1" ]
 then
   export gls="${2:-${0##*/}}"
@@ -77,5 +79,4 @@ then
 fi
 #############################################################################
 
-. gls_exec_reset
 . gls_exec

@@ -186,4 +186,31 @@ GLS_COMMAND_PATH=a/b/c
 "
 }
 
+#
+# reentry
+#
+
+test_commands_can_reenter_themselves () {
+mkdir -p "$ts_test_dir"
+
+cat > "$ts_test_dir/example" <<"DOC"
+. gls .
+gls_exec "$@"
+DOC
+
+cat > "$ts_test_dir/example-a" <<"DOC"
+example b
+DOC
+
+cat > "$ts_test_dir/example-b" <<"DOC"
+printf "success\n"
+DOC
+
+chmod +x "$ts_test_dir/example"*
+
+example a | assert_output "\
+success
+"
+}
+
 . ts
