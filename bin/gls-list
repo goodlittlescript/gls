@@ -51,7 +51,7 @@ fi
 #############################################################################
 IFS=: read -a paths <<<"$PATH"
 printf -v command_path '%s_' "$@"
-printf -v extname_pattern '%s|' "${extnames[@]}"
+printf -v extname_pattern '\.%s|' "${extnames[@]}"
 
 path_index=0
 for path in "${paths[@]}"
@@ -87,20 +87,25 @@ awk -F "." '
   print "." extname " " $0
 }
 ' |
-grep -E "^\.(${extname_pattern%|}) " |
-sed -ne 's/^[^ ]* //' -e '/[^ ]/p' |
-sort -u |
+grep -E "^(${extname_pattern%|}) ." |
+sort -u -k 2 |
 
 if [ "true" = "$print_desc" ]
 then
-  while read command_name
+  while read extname command_name
   do
-    . gls_exec_reset
-    . gls_exec_env "$@" "$command_name"
-    if [ -n "$GLS_COMMAND_DESC" ]
-    then printf "  %-15s %s\n" "$command_name" "$GLS_COMMAND_DESC"
-    else printf "  %s\n" "$command_name"
+    if [ "$extname" == "." ]
+    then
+      . gls_exec_reset
+      . gls_exec_env "$@" "$command_name"
+      if [ -n "$GLS_COMMAND_DESC" ]
+      then printf "  %-15s %s\n" "$command_name" "$GLS_COMMAND_DESC"
+      else printf "  %s\n" "$command_name"
+      fi
+    else
+      printf "  %s\n" "$command_name"
     fi
   done
-else cat
+else
+  sed -ne 's/^[^ ]* //' -e '/[^ ]/p'
 fi
