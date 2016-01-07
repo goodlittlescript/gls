@@ -1,0 +1,38 @@
+#!/bin/bash
+#############################################################################
+elastic_ping_usage () {
+printf "%s" "\
+usage: elastic ping [-h]
+
+  Confirm elastic is available.
+
+options:
+
+  -h          prints help
+  -p          preview requests
+
+"
+}
+args=""
+while [ $OPTIND -le $# ]
+do
+  if getopts "hp" option
+  then
+    case $option in
+      (h) elastic_ping_usage
+          exit 0 ;;
+      (p) preview="true";;
+      (*) elastic_ping_usage | head -n 1
+          exit 2 ;;
+    esac
+  else
+    args="$args \"\${$OPTIND}\""
+    OPTIND=$(($OPTIND + 1))
+  fi
+done
+eval set -- "$args"
+
+verbose="${verbose:-}"
+#############################################################################
+
+elastic api get -v _cat/health 2<&1 | grep -q '200 OK'
