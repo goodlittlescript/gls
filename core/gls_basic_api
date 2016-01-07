@@ -2,7 +2,7 @@
 #############################################################################
 gls_basic_api_usage () {
 printf "%s" "\
-usage: ${GLS_COMMAND_BASE//_/ } [options] METHOD PATH [CURL_OPTIONS...]
+usage: ${gls} ${GLS_COMMAND_BASE//_/ } [options] METHOD PATH [CURL_OPTIONS...]
 
   Send a request to the API.
 

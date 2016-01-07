@@ -1,0 +1,12 @@
+# Clear any incoming gls variables/functions and blank config dirs
+unset $(env | sed -n -e '
+  /^GLS_/s/=.*//p
+  /^gls_/s/=.*//p
+')
+
+# Setup PATH
+export GLS_HOME="$PWD" 
+. lib/elastic/elastic.env
+
+# For sorting
+export LC_ALL=C

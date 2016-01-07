@@ -1,3 +1,4 @@
 #!/bin/sh
 export PATH="$PATH:vendor/ts/bin"
 ts "$@" test/gls*
+ts "$@" test/lib/elastic/elastic*

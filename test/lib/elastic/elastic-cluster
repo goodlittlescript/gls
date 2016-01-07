@@ -1,0 +1,26 @@
+#!/bin/bash
+. test/lib/elastic/helper
+
+test_elastic_cluster_fetches_cluster_endpoint () {
+expected="$(curl -s http://boot2docker:9200/_cat/health)"
+actual="$(elastic cluster health)"
+assert_output "$expected" "$actual"
+}
+
+#
+# -h
+#
+
+test_elastic_cluster_h_prints_help () {
+elastic cluster -h | grep -q "usage: elastic cluster"
+}
+
+#
+# -l
+#
+
+test_elastic_cluster_l_lists_available_endpoints () {
+elastic cluster -l | grep -q "health"
+}
+
+. ts

@@ -1,0 +1,21 @@
+#!/bin/bash
+. test/lib/elastic/helper
+
+test_elastic_ping_returns_success_when_elastic_is_available () {
+elastic ping
+}
+
+test_elastic_ping_returns_failure_when_elastic_is_unavailable () {
+export ELASTIC_DOMAIN="boot2docker:3000"
+! elastic ping
+}
+
+#
+# -h
+#
+
+test_elastic_ping_h_prints_help () {
+elastic ping -h | grep -q "usage: elastic ping"
+}
+
+. ts

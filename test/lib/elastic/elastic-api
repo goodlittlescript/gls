@@ -1,0 +1,12 @@
+#!/bin/bash
+. test/lib/elastic/helper
+
+#
+# -h
+#
+
+test_elastic_api_h_prints_help () {
+elastic api -h | grep -q "usage: elastic api"
+}
+
+. ts
