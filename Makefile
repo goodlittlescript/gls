@@ -1,4 +1,25 @@
-# Builds the gls man pages.
+#
+# Host tasks
+#
+
+images: clean
+	docker-compose build
+
+clean:
+	docker-compose kill
+	docker-compose rm --force -v
+
+start:
+	docker-compose up -d --no-recreate
+
+stop:
+	docker-compose stop
+
+logs:
+	docker-compose logs
+
+###
+
 manpages:
 	. ./bin/gls .; make man/man1/gls.1 VERSION=$$GLS_VERSION DATE=$$GLS_RELDATE
 
@@ -19,3 +40,7 @@ release: variables manpages
 	@printf "%s\n" "homebrew-gls with the new tar.gz/SHA1.  To calculate"
 	@printf "%s\n" "the SHA1 use 'openssl sha1 PATH_TO_TARBALL'."
 	@printf "\n"
+
+#
+# Container tasks
+#

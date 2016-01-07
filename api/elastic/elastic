@@ -37,5 +37,6 @@ then
 fi
 #############################################################################
 
-export ELASTIC_DOMAIN=${ELASTIC_DOMAIN:-localhost:9200}
+export ELASTIC_DOMAIN="${ELASTIC_DOMAIN:-boot2docker:9200}"
+export ELASTIC_PROTOCOL="${ELASTIC_PROTOCOL:-http}"
 gls_exec "$@"
